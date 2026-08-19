@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مسجل بث احترافي</title>
+    <style>
+        body { background-color: #0f141c; color: #fff; font-family: Tahoma, sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: #161b22; padding: 20px; border-radius: 12px; border: 1px: solid #30363d; }
+        h1 { font-size: 20px; color: #58a6ff; margin-bottom: 5px; }
+        p { font-size: 13px; color: #8b949e; margin-top: 0; }
+        .section { background: #0d1117; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #21262d; }
+        .section-title { font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #f0f6fc; }
+        label { display: block; font-size: 12px; color: #8b949e; margin-bottom: 5px; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 10px; background: #161b22; border: 1px solid #30363d; border-radius: 6px; color: #fff; box-sizing: border-box; margin-bottom: 10px; }
+        .row { display: flex; gap: 10px; }
+        .col { flex: 1; }
+        button { background: #238636; color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; }
+        button:hover { background: #2ea043; }
+        #status-msg { margin-top: 15px; font-size: 13px; padding: 10px; border-radius: 6px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>مسجل بث احترافي v1.0</h1>
+    <p>التقط البث، كما تريده.</p>
+
+    <form id="recordForm">
+        <!-- 01 مصدر التسجيل -->
+        <div class="section">
+            <div class="section-title">01 مصدر التسجيل</div>
+            <label>رابط البث المباشر *</label>
+            <input type="text" name="m3u8_url" placeholder="https://example.com/live/stream.m3u8" required>
+            
+            <div class="row">
+                <div class="col">
+                    <label>مدة التسجيل (ثانية)</label>
+                    <input type="number" name="duration" value="300">
+                </div>
+                <div class="col">
+                    <label>اسم الملف الناتج</label>
+                    <input type="text" name="output_name" value="recording.mp4">
+                </div>
+            </div>
+        </div>
+
+        <!-- 02 الحفظ السحابي -->
+        <div class="section">
+            <div class="section-title">02 الحفظ السحابي</div>
+            <label>معرف مجلد Google Drive (اختياري)</label>
+            <input type="text" name="drive_folder" placeholder="اتركه فارغاً للاحتفاظ محلياً">
+        </div>
+
+        <button type="submit">بدء التسجيل ←</button>
+    </form>
+
+    <div id="status-msg"></div>
+</div>
+
+<script>
+    document.getElementById('recordForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const msgBox = document.getElementById('status-msg');
+        
+        msgBox.style.display = 'block';
+        msgBox.style.background = '#1f6feb';
+        msgBox.textContent = 'جاري إرسال الطلب وبدء التسجيل في الخلفية...';
+
+        try {
+            const response = await fetch('/start-recording', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            if(response.ok) {
+                msgBox.style.background = '#238636';
+                msgBox.textContent = result.message;
+            } else {
+                msgBox.style.background = '#da3633';
+                msgBox.textContent = result.error;
+            }
+        } catch (err) {
+            msgBox.style.background = '#da3633';
+            msgBox.textContent = 'حدث خطأ أثناء الاتصال بالخادم.';
+        }
+    };
+</script>
+
+</body>
+</html>
+
