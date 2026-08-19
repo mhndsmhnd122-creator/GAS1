@@ -1,0 +1,31 @@
+name: Stream Recorder Action
+
+on:
+  workflow_dispatch:
+    inputs:
+      m3u8_url:
+        description: 'رابط البث m3u8'
+        required: true
+      duration:
+        description: 'مدة التسجيل بالثواني'
+        default: '60'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install Dependencies
+        run: pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib
+      - name: Run Recorder
+        env:
+          M3U8_URL: ${{ github.event.inputs.m3u8_url }}
+          DURATION: ${{ github.event.inputs.duration }}
+        run: python main.py
+
